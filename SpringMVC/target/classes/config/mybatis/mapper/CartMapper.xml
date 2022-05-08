@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper 
+   namespace="com.myspring.mapper.CartMapper">
+   
+   <!--  특정회원 특정상품의 개수 가져오기-->
+   <select id="selectCartByPnum" resultType="int" parameterType="Cart">
+   		select count(cartNum) from cart 
+   		where idx_fk=#{idx_fk} and pnum_fk=#{pnum_fk}
+   </select>
+   
+   <!-- 장바구니 상품 수량 수정 -->
+   <update id="updateCartOqty" parameterType="Cart">
+   		update cart set oqty=oqty +#{oqty} 
+   		where idx_fk=#{idx_fk} and pnum_fk=#{pnum_fk}
+   </update>
+   
+   <!-- 장바구니에 상품 추가 -->
+   <insert id="addCart" parameterType="Cart">
+   		<selectKey keyProperty="cartNum" resultType="int" order="BEFORE">
+   			select cart_seq.nextval from dual
+   		</selectKey>
+   		insert into cart 
+   		values(#{cartNum},#{oqty:NUMERIC},sysdate,#{idx_fk},#{pnum_fk})
+   </insert>
+   
+   <!-- 회원번호로 장바구니 목록 가져오기 -->
+   <select id="selectCartView" parameterType="int" resultType="Cart">
+   		<!-- select * from cart where idx_fk=#{value} -->
+   		<!-- select c.*, p.pname, nvl(p.pimage1,'noimage.png') pimage1,
+		price, saleprice, point, (saleprice * oqty) totalPrice,
+		(point * oqty) totalPoint
+		from cart c join product p
+		on c.pnum_fk = p.pnum
+   		and idx_fk=#{value} -->
+   		select * from CartView where idx_fk=#{value}
+   </select>
+   
+   <!-- 회원의 장바구니 총액 가져오기 -->
+   <select id="getCartTotal" parameterType="int" resultType="Cart">
+   		select sum(totalPrice) cartTotalPrice,
+   			   sum(totalPoint) cartTotalPoint
+   			   from CartView where idx_fk=#{value}   
+   </select>
+   
+   <delete id="delCart" parameterType="int">
+   		delete from cart where cartNum=#{value}
+   </delete>
+   
+   <update id="editCart" parameterType="Cart">
+   		update cart set oqty =#{oqty} where cartNum=#{cartNum}
+   </update>
+   
+   <!-- 주문완료된 상품을 장바구니에서 삭제하기 -->
+   <delete id="delCartByOrder" parameterType="map">
+   		delete from cart where idx_fk=#{idx_fk} and pnum_fk=#{pnum_fk}
+   </delete>
+   
+   
+</mapper>
+   

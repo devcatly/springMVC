@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper 
+   namespace="com.myspring.mapper.OrderMapper">
+   
+   <!--1. 주문 개요 정보 insert  -->
+   <insert id="orderDescInsert" parameterType="Order">
+   		insert into orderDesc values(#{onum},#{ototalPrice},#{ototalPoint},#{odeliverCost},
+   		#{odeliverState},#{opayWay},#{opayState},#{omileage}, sysdate, #{omemo:VARCHAR},#{idx_fk})
+   </insert>
+   
+   <!--2. 주문상품 정보 insert  -->
+   <insert id="orderProductInsert" parameterType="Product">
+   		insert into orderProduct(onum, pnum_fk, oqty, saleprice,opoint, pimage)
+   		values(#{onum},#{pnum},#{pqty},#{saleprice},#{point},#{pimage1})
+   </insert>
+   
+   <!--3. 수령자 정보 insert  -->
+   <insert id="receiverInsert" parameterType="Order">
+   		insert into receiver(onum, rcvname, hp1,hp2,hp3, zipcode,addr1, addr2)
+   		values(#{onum},#{receiver.rcvname},#{receiver.hp1},#{receiver.hp2},#{receiver.hp3}
+   		,#{receiver.zipcode},#{receiver.addr1},#{receiver.addr2})
+   </insert>
+   
+   <!-- [주문내역정보] 주문번호로 상세 주문정보 가져오기 
+   		orderDesc, orderProduct, receiver를 join해서 가져오자 ==> OrderVO와 매핑
+    -->
+   <select id="getOrderDesc" parameterType="string" resultMap="OrderJoin">
+   	select  a.onum, idx_fk, ototalPrice, ototalPoint, odeliverCost,
+	odeliverState, opayWay, opayState, omileage, orderDate, omemo,
+	pnum_fk, pimage, ( select pname from product where pnum = b.pnum_fk) pname,
+	oqty, saleprice, opoint,
+	rcvname, hp1,hp2,hp3, zipcode, addr1, addr2
+	from orderDesc a join orderProduct b
+	on a.onum = b.onum
+	join receiver c
+	on b.onum = c.onum
+	where a.onum=#{onum}
+   </select>
+   
+   <!-- [주문관련} Join절에서 사용할 매핑정보 
+   		OrderVO has a ReceiverVO [1:1관계]
+   		OrderVO has many ProductVO==> List<ProductVO> [1:N 관계]
+   -->
+   <resultMap type="Order" id="OrderJoin">
+   		<id property="onum" column="onum"/>
+   		<!--property는 VO의 프로퍼티명을 기술
+   			column은 db table을 컬럼명을 기술
+   		  -->
+   		 <result property="ototalPrice" column="ototalPrice"/> 
+   		 <result property="ototalPoint" column="ototalPoint"/> 
+   		 <result property="odeliverCost" column="odeliverCost"/> 
+   		 <result property="odeliverState" column="odeliverState"/> 
+   		 <result property="opayWay" column="opayWay"/> 
+   		 <result property="opayState" column="opayState"/> 
+   		 <result property="omileage" column="omileage"/> 
+   		 <result property="orderDate" column="orderDate"/> 
+   		 <result property="omemo" column="omemo"/> 
+   		 <result property="idx_fk" column="idx_fk"/> 
+   		 <!--  OrderVO has a ReceiverVO [1:1관계]-->
+   		 <association property="receiver" javaType="Receiver">
+   		 	<id property="onum" column="onum"/>
+   		 	<result property="rcvname" column="rcvname"/>
+   		 	<result property="hp1" column="hp1"/>
+   		 	<result property="hp2" column="hp2"/>
+   		 	<result property="hp3" column="hp3"/>
+   		 	<result property="zipcode" column="zipcode"/>
+   		 	<result property="addr1" column="addr1"/>
+   		 	<result property="addr2" column="addr2"/>
+   		 </association>
+   		 <!-- OrderVO has many ProductVO==> List<ProductVO> [1:N 관계] -->
+   		 <collection property="orderList" javaType="java.util.ArrayList"
+   		  ofType="Product">
+   		 	<result property="pnum" column="pnum_fk"/>
+   		 	<result property="pname" column="pname"/>
+   		 	<result property="pimage1" column="pimage"/>
+   		 	<result property="pqty" column="oqty"/>
+   		 	<result property="saleprice" column="saleprice"/>
+   		 	<result property="point" column="opoint"/>   		 	
+   		 </collection>
+   </resultMap>
+   
+   <!--[MyPage관련] 특정 회원의 주문목록 가져오기 [orderView를 통해 가져오기]-->
+   	<select id="getUserOrderList" parameterType="int" resultType="Order">
+  		select onum, pnum_fk, pname, pimage, orderDate, ototalPrice 
+  		from orderView
+		where idx_fk=#{value} order by orderDate desc
+   	</select>
+   
+</mapper>
+   
+   
+   
+   
+   

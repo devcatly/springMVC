@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 타입 별칭 설정============================  -->
+	<typeAliases>
+		<typeAlias type="com.myspring.memo.domain.MemoVO" alias="Memo"/>
+		<typeAlias type="com.myspring.domain.CategoryVO" alias="Category"/>
+		<typeAlias type="com.myspring.domain.ProductVO" alias="Product"/>		
+		<typeAlias type="com.myspring.domain.CartVO" alias="Cart"/>		
+		<typeAlias type="com.myspring.domain.MemberVO" alias="User"/>		
+		<typeAlias type="com.myspring.domain.OrderVO" alias="Order"/>		
+		<typeAlias type="com.myspring.domain.ReceiverVO" alias="Receiver"/>		
+		<typeAlias type="com.myspring.domain.BoardVO" alias="Board"/>		
+		<typeAlias type="com.myspring.domain.PagingVO" alias="Page"/>		
+	</typeAliases>
+	
+	<!-- 매퍼 정의================================ -->
+	<mappers>
+		<mapper resource="config/mybatis/mapper/MemoMapper.xml"/>
+		<mapper resource="config/mybatis/mapper/CategoryMapper.xml"/>
+		<mapper resource="config/mybatis/mapper/ProductMapper.xml"/>
+		<mapper resource="config/mybatis/mapper/CartMapper.xml"/>
+		<mapper resource="config/mybatis/mapper/UserMapper.xml"/>
+		<mapper resource="config/mybatis/mapper/OrderMapper.xml"/>
+		<mapper resource="config/mybatis/mapper/BoardMapper.xml"/>
+	</mappers>
+</configuration>

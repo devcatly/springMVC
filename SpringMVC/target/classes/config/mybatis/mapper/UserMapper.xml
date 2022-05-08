@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper 
+   namespace="com.myspring.mapper.UserMapper">
+   <select id="findMemberByUserid" parameterType="string" resultType="User">
+   		select * from jsp_member where userid=#{value}
+   </select>
+   <select id="findMemberByIdx" parameterType="int" resultType="User">
+   		select * from jsp_member where idx=#{value}
+   </select>
+   
+   <!-- [주문관련] 회원 마일리지 차감 -->
+   <update id="updateMileageDown" parameterType="Order">
+   		update jsp_member set mileage = mileage - #{omileage}
+   		where idx=#{idx_fk}
+   </update>
+   <!-- [주문관련] 회원 마일리지 적립(구매 포인트 만큼) -->
+   <update id="updateMileageUp" parameterType="Order">
+   		update jsp_member set mileage = mileage + #{ototalPoint}
+   		where idx=#{idx_fk}
+   </update>
+   
+</mapper>
+   

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper 
+   namespace="com.myspring.persistence.CategoryMapper">
+   <select id="categoryAll" resultType="Category">
+   		select * from category order by cg_num desc
+   </select>
+   
+   <insert id="insertCategory" parameterType="Category">
+   	<selectKey keyProperty="cg_num" resultType="int" order="BEFORE">
+   		select category_seq.nextval from dual
+   	</selectKey>
+   		insert into category(cg_num, cg_name, cg_code)
+   		values(#{cg_num},#{cg_name},#{cg_code})
+   </insert>
+   
+   <delete id="deleteCategory" parameterType="int">
+   		delete from category where cg_num=#{value}
+   </delete>
+</mapper>
+   

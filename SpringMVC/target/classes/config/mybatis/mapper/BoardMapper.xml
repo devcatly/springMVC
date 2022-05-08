@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper 
+   namespace="com.myspring.mapper.BoardMapper">
+   <!-- [계층형 게시판] refer:글그룹번호, lev: 답변 레벨, sunbun: 같은 글그룹내의 순번
+   					refer와 idx는 원본글쓰기 일때 같은 값을 갖는다.
+    -->
+   <insert id="insertBoard" parameterType="Board">
+   		<selectKey keyProperty="idx" keyColumn="idx" order="BEFORE" resultType="int">
+   			select spring_board_seq.nextval from dual
+   		</selectKey>
+   		insert into spring_board values(#{idx}, #{name},#{pwd},#{subject},
+   		#{content:VARCHAR}, sysdate,#{readnum},#{filename:VARCHAR},#{originFilename:VARCHAR},
+   		#{filesize:NUMERIC},#{idx},#{lev},#{sunbun})
+   </insert>
+   <!-- [글목록] -->
+   <select id="getTotalCount" resultType="int">
+   		select count(idx) from spring_board
+   </select>   
+   <select id="listBoard" parameterType="com.myspring.domain.PagingVO" resultType="Board">
+ 		<!-- select * from spring_board order by idx desc  --> 
+ 		<!-- select * from spring_board order by refer desc, sunbun asc -->
+ 		select * from (
+		select a.*, rownum rn from
+		(select * from spring_board
+		<include refid="where_clause"/>
+		order by refer desc, sunbun asc) a
+		) where rn between #{start} and #{end}
+   </select>
+   <!-- [글목록-페이징처리] -->
+   <select id="getFindTotalCount" resultType="int" parameterType="Page">
+   		select count(idx) from spring_board
+   		<include refid="where_clause"/>
+   </select>
+   
+   <sql id="where_clause">
+   		<if test="findType!=null and findKeyword !=''">
+   			<where>
+   				<if test="findType==1"> <!-- 제목 -->
+   					subject like '%'||#{findKeyword}||'%'   					
+   				</if>
+   				<if test="findType==2"> <!-- 작성자 -->
+   					name like '%'||#{findKeyword}||'%'   					
+   				</if>
+   				<if test="findType==3"> <!-- 글내용 -->
+   					content like '%'||#{findKeyword}||'%'   					
+   				</if>
+   			</where>
+   		</if>
+   </sql>
+   
+   <update id="updateReadnum" parameterType="string">
+   		update spring_board set readnum = readnum+1 where idx=#{value}
+   </update>
+   
+   <select id="viewBoard" parameterType="string" resultType="Board">
+   		select * from spring_board where idx=#{value}
+   </select>
+   
+   <update id="editBoard" parameterType="Board">
+   		update spring_board set name=#{name}, subject=#{subject},
+   		content=#{content:VARCHAR}, pwd=#{pwd}
+   		<if test="filename!=null and filename !=''">
+   		, filename=#{filename}, originFilename=#{originFilename}, filesize=#{filesize}
+   		</if>
+   		where idx=#{idx}
+   </update>
+   
+   <delete id="deleteBoard" parameterType="string">
+   		delete from spring_board where idx=#{value}
+   </delete>
+   
+   <!--[답변글쓰기 관련 - 1단계] 부모글의 refer, lev, sunbun가져오기 -->
+   <select id="selectRefLevSunbun" parameterType="string" resultType="Board">
+   		select refer, lev, sunbun from spring_board where idx =#{value}
+   		
+   </select>
+   
+   <!--[답변글쓰기 관련 - 2단계]  -->
+   <update id="updateSunbun" parameterType="Board">
+   		update spring_board set sunbun = sunbun+1 
+   		where refer=#{refer} and sunbun > #{sunbun}
+   </update>
+   
+   <!--[답변글쓰기 관련 - 3단계] 답변글 insert하기 
+   		refer: refer, lev: lev+1, sunbun: sunbun+1 -->
+   <insert id="rewriteBoard" parameterType="Board">
+   		<selectKey keyProperty="idx" keyColumn="idx" order="BEFORE" resultType="int">
+   			select spring_board_seq.nextval from dual
+   		</selectKey>
+   		insert into spring_board values(#{idx}, #{name},#{pwd},#{subject},
+   		#{content:VARCHAR}, sysdate,#{readnum},#{filename:VARCHAR},#{originFilename:VARCHAR},
+   		#{filesize:NUMERIC},#{refer},#{lev},#{sunbun})
+   </insert>
+</mapper>
+   
